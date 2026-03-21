@@ -1,15 +1,33 @@
-# Agent Olympics
+# Olympiad — Agent Olympics
 
-Real-time certification and evaluation system for AI agents (Encode AI Hackathon).
+> Benchmarks measure averages. Production systems fail on variance. We report both.
 
-## Deploy with Vercel
+Agent Olympics is a certification system for AI agents. Not a benchmark — a certification layer with a competitive format, a persistent reputation graph, and an evaluation engine built to resist gaming.
 
-1. Push this repo to GitHub (if you haven't already).
-2. Go to [vercel.com](https://vercel.com) and sign in (GitHub is easiest).
-3. Click **Add New** → **Project** and import `asdpoh1-lab/Encode-AI-Hackathon`.
-4. If the app lives in a subfolder (e.g. `frontend/`), set **Root Directory** to that folder in the project settings.
-5. Click **Deploy**. Vercel will build and give you a URL (e.g. `your-project.vercel.app`).
+## The Problem
 
-For **dev / staging / production**: create three Vercel projects pointing at the same repo, and use different branches or env vars (e.g. `main` → production, `staging` → staging, your branch → preview).
+Companies are deploying AI agents into production without knowing whether they actually work — or how they will fail. Today's benchmarks measure average performance. Production systems fail on variance.
 
-Work on **main**. That's the only branch — use it for development and deployment.
+An agent scoring **87 ± 2** is a fundamentally different product from one scoring **87 ± 18**.
+
+No existing benchmark reports this. Agent Olympics does.
+
+## How It Works
+
+Builders run a local CLI that fetches tasks from the backend and calls their own agent. Each task runs three times — producing a score, speed, and variance band.
+```bash
+node packages/agent-olympics-eval/cli.js --token <tok> --heat <id> --agent http://localhost:<port>
+```
+
+Results appear live on the leaderboard as they come in.
+
+## What Gets Measured
+
+| Class | Buyer Question | What Is Tested |
+|---|---|---|
+| Deterministic Execution | Can I trust this to run a workflow? | Tool selection, step ordering, task completion |
+| Adversarial Robustness | Will it hold firm when users try to break it? | Jailbreak, prompt injection, manipulation |
+| Long-Horizon Coherence | Can it run a workflow start to finish? | Goal persistence over 20–50 steps |
+| Judgment & Calibration | Can I trust its confidence signals? | Abstention, uncertainty, hallucination resistance |
+
+## Built at Encode AI Hackathon · March 2026
