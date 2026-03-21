@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const crypto = require('crypto');
@@ -9,12 +10,15 @@ const {
   getWinnerPayload,
   parseTaskIdsJson,
 } = require('./routes');
+const hfProxy = require('./hf-proxy');
 const { validateSubmitResults, normalizeAgentNameForClaim } = require('./submitValidation');
 const heatStore = require('./heatStore');
+
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use('/api', hfProxy);
 
 const db = initDb();
 app.set('db', db);

@@ -3,120 +3,409 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Agent Olympics - Arena</title>
-  <link rel="stylesheet" href="/style.css" />
+  <title>Agent Olympics — Which AI wins?</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" />
   <style>
-    .steps-section {
-      padding-bottom: 1.5rem;
-      border-bottom: 1px solid var(--border);
-      margin-bottom: 1.5rem;
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:        #0a0a0f;
+      --surface:   #13131a;
+      --border:    #22222e;
+      --gold:      #f5c542;
+      --gold-dim:  #b8922e;
+      --silver:    #c0c8d8;
+      --bronze:    #cd7f32;
+      --accent:    #4f7cff;
+      --red:       #ff5f5f;
+      --text:      #e8e8f0;
+      --muted:     #6b6b80;
+      --radius:    12px;
+      --font-head: 'Syne', sans-serif;
+      --font-mono: 'DM Mono', monospace;
     }
-    .steps-section h2 {
-      margin: 0 0 0.75rem;
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: var(--muted);
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: var(--font-head); min-height: 100vh; overflow-x: hidden; }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(79,124,255,.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(79,124,255,.04) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+      z-index: 0;
     }
-    .steps-list {
-      margin: 0;
-      padding-left: 1.2rem;
-      display: grid;
-      gap: 0.75rem;
+    .page { position: relative; z-index: 1; max-width: 860px; margin: 0 auto; padding: 0 24px 80px; }
+    header { padding: 56px 0 40px; text-align: center; }
+    .logo-tag {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(245,197,66,.08); border: 1px solid rgba(245,197,66,.2);
+      border-radius: 100px; padding: 4px 14px; font-size: 11px;
+      font-family: var(--font-mono); color: var(--gold);
+      letter-spacing: .08em; text-transform: uppercase; margin-bottom: 24px;
     }
-    .steps-list li {
-      color: var(--text);
+    .logo-tag::before { content: '🏆'; }
+    h1 {
+      font-size: clamp(2.2rem, 6vw, 3.8rem); font-weight: 800; line-height: 1.05; letter-spacing: -.02em;
+      background: linear-gradient(135deg, #fff 0%, var(--silver) 60%, var(--gold) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     }
-    .steps-list code {
-      display: inline-block;
-      margin-top: 0.25rem;
-      padding: 0.2rem 0.4rem;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      font-family: ui-monospace, monospace;
-      font-size: 0.85rem;
-      color: var(--text);
-      word-break: break-all;
+    .subtitle { margin-top: 14px; color: var(--muted); font-size: 1rem; font-family: var(--font-mono); }
+    .search-wrap { margin: 40px 0 0; }
+    .search-wrap textarea {
+      width: 100%; background: var(--surface); border: 1.5px solid var(--border);
+      border-radius: var(--radius); color: var(--text); font-family: var(--font-head);
+      font-size: 1rem; padding: 18px 20px; resize: none; height: 100px;
+      outline: none; transition: border-color .2s; line-height: 1.5;
     }
-    .join-section { max-width: 720px; margin: 2rem auto 0; padding: 1.5rem 0; border-top: 1px solid var(--border); }
-    .join-section h2 { font-size: 1.1rem; font-weight: 600; color: var(--muted); margin: 0 0 1rem; }
-    .oneliner-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; margin: 1rem 0; overflow-x: auto; }
-    .oneliner { font-family: ui-monospace, monospace; font-size: 0.9rem; word-break: break-all; }
-    .join-section input { width: 100%; padding: 0.6rem 0.75rem; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); color: var(--text); font-size: 0.95rem; margin-bottom: 0.5rem; }
-    .join-section label { display: block; font-size: 0.85rem; color: var(--muted); margin-bottom: 0.25rem; }
-    .join-section .note { font-size: 0.85rem; color: var(--muted); margin-top: 1rem; }
-    .join-section a { color: var(--accent); }
-    .home-link { color: var(--accent); text-decoration: none; }
-    .home-link:hover { text-decoration: underline; }
+    .search-wrap textarea::placeholder { color: var(--muted); }
+    .search-wrap textarea:focus { border-color: var(--accent); }
+    .search-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; }
+    .hint { font-size: .8rem; font-family: var(--font-mono); color: var(--muted); }
+    .btn-run {
+      background: var(--gold); color: #0a0a0f; border: none; border-radius: 8px;
+      font-family: var(--font-head); font-weight: 700; font-size: .95rem;
+      padding: 12px 28px; cursor: pointer; transition: opacity .15s, transform .1s;
+    }
+    .btn-run:hover { opacity: .9; transform: translateY(-1px); }
+    .btn-run:disabled { opacity: .4; cursor: not-allowed; transform: none; }
+    .config-bar {
+      margin-top: 16px; background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 14px 18px; display: none; gap: 12px; flex-direction: column;
+    }
+    .config-bar.open { display: flex; }
+    .config-bar label { font-size: .78rem; font-family: var(--font-mono); color: var(--muted); display: block; margin-bottom: 4px; }
+    .config-bar input {
+      width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+      color: var(--text); font-family: var(--font-mono); font-size: .85rem; padding: 8px 12px; outline: none;
+    }
+    .config-bar input:focus { border-color: var(--accent); }
+    .config-toggle { background: none; border: none; color: var(--muted); font-family: var(--font-mono); font-size: .78rem; cursor: pointer; padding: 4px 0; text-decoration: underline; }
+    #status { margin-top: 32px; text-align: center; font-family: var(--font-mono); font-size: .9rem; color: var(--muted); min-height: 28px; }
+    .spinner {
+      display: inline-block; width: 14px; height: 14px;
+      border: 2px solid var(--border); border-top-color: var(--gold);
+      border-radius: 50%; animation: spin .7s linear infinite; vertical-align: middle; margin-right: 8px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #results { margin-top: 40px; }
+    .results-header { display: flex; align-items: baseline; gap: 12px; margin-bottom: 20px; }
+    .results-header h2 { font-size: 1.1rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+    .q-display { font-family: var(--font-mono); font-size: .8rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 400px; }
+    .podium { display: grid; gap: 12px; margin-bottom: 32px; }
+    .podium-card {
+      background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius);
+      padding: 20px 16px; text-align: center; position: relative; overflow: hidden; animation: fadeUp .4s ease both;
+    }
+    .podium-card.rank-1 { border-color: var(--gold-dim); }
+    .podium-card.rank-2 { border-color: #555; }
+    .podium-card.rank-1::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse at top, rgba(245,197,66,.07) 0%, transparent 70%); pointer-events: none;
+    }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+    .medal { font-size: 1.8rem; margin-bottom: 8px; }
+    .model-label { font-size: .9rem; font-weight: 700; margin-bottom: 4px; }
+    .total-score { font-size: 2.4rem; font-weight: 800; line-height: 1; margin-bottom: 2px; }
+    .rank-1 .total-score { color: var(--gold); }
+    .rank-2 .total-score { color: var(--silver); }
+    .score-label { font-size: .72rem; font-family: var(--font-mono); color: var(--muted); }
+    .latency-badge {
+      display: inline-block; margin-top: 10px; background: var(--bg); border: 1px solid var(--border);
+      border-radius: 100px; padding: 2px 10px; font-size: .72rem; font-family: var(--font-mono); color: var(--muted);
+    }
+    .breakdown-grid { display: grid; gap: 12px; }
+    .breakdown-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; animation: fadeUp .5s ease both; }
+    .breakdown-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+    .breakdown-name { font-weight: 700; font-size: .95rem; }
+    .breakdown-reasoning { font-family: var(--font-mono); font-size: .78rem; color: var(--muted); font-style: italic; margin-bottom: 14px; line-height: 1.5; }
+    .bars { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 20px; }
+    .bar-row label { font-size: .72rem; font-family: var(--font-mono); color: var(--muted); text-transform: uppercase; letter-spacing: .06em; display: flex; justify-content: space-between; margin-bottom: 4px; }
+    .bar-track { height: 6px; background: var(--bg); border-radius: 100px; overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: 100px; background: var(--accent); transition: width 1s cubic-bezier(.22,1,.36,1); }
+    .rank-1 .bar-fill { background: var(--gold); }
+    .answer-toggle { background: none; border: 1px solid var(--border); border-radius: 6px; color: var(--muted); font-family: var(--font-mono); font-size: .78rem; padding: 6px 12px; cursor: pointer; margin-top: 14px; transition: border-color .15s, color .15s; }
+    .answer-toggle:hover { border-color: var(--accent); color: var(--text); }
+    .answer-text { display: none; margin-top: 12px; font-family: var(--font-mono); font-size: .82rem; color: var(--silver); line-height: 1.7; white-space: pre-wrap; background: var(--bg); border-radius: 8px; padding: 14px; border: 1px solid var(--border); max-height: 300px; overflow-y: auto; }
+    .answer-text.open { display: block; }
+    .error-box { background: rgba(255,95,95,.08); border: 1px solid rgba(255,95,95,.25); border-radius: var(--radius); padding: 16px 20px; font-family: var(--font-mono); font-size: .85rem; color: var(--red); }
+    .model-error { color: var(--red); font-style: italic; font-size: .82rem; }
+    footer { margin-top: 60px; text-align: center; font-family: var(--font-mono); font-size: .75rem; color: var(--muted); }
   </style>
 </head>
 <body>
+<div class="page">
   <header>
-    <h1>Agent Olympics</h1>
-    <p class="tagline">Run locally. One command. Leaderboard.</p>
-    <p class="tagline"><a class="home-link" href="/">Back to welcome page</a></p>
+    <div class="logo-tag">Agent Olympics · Hackathon Demo</div>
+    <h1>Which AI<br>wins your question?</h1>
+    <p class="subtitle">Ask anything. Two models compete. One leaderboard.</p>
   </header>
-  <main>
-    <section class="heat-panel" id="heat-panel">
-      <div id="heat-winner-banner" class="heat-winner-banner" style="display: none;" role="status"></div>
-      <div class="heat-row">
-        <span class="heat-title" id="heat-title">Heat —</span>
-        <span class="heat-badge" id="heat-badge">WAITING</span>
-      </div>
-      <div class="heat-countdown" id="heat-countdown" style="display: none;"></div>
-      <p class="heat-detail" id="heat-registered"></p>
-      <p class="heat-detail" id="heat-submitted"></p>
-      <p class="heat-detail heat-hint" id="heat-hint"></p>
-      <div class="heat-register" id="heat-register-wrap" style="display: none;">
-        <label for="register-name">Register for this heat (optional)</label>
-        <div class="heat-register-row">
-          <input type="text" id="register-name" placeholder="Your team / agent name" />
-          <button type="button" id="register-btn">Register</button>
-        </div>
-        <p class="register-message" id="register-message"></p>
-      </div>
-    </section>
-    <section class="steps-section">
-      <h2>How to test your agent</h2>
-      <ol class="steps-list">
-        <li>
-          <strong>Hosted site (e.g. Vercel):</strong> “Backend URL” below should point to the public Agent Olympics API (it may be pre-filled). You do not run the API on your laptop for visitors to see the leaderboard.
-          <br /><br />
-          <strong>Local dev:</strong> run the API yourself — <code>cd backend &amp;&amp; npm start</code> on <code>http://localhost:3001</code> (matches the Vite <code>/api</code> proxy).
-        </li>
-        <li>
-          Start your agent API and make sure it accepts POST JSON at your endpoint (example: <code>http://localhost:8080/task</code>).
-        </li>
-        <li>
-          From the <strong>repo root</strong> (folder that contains <code>packages/</code>), copy the command below, paste in Terminal, then watch the leaderboard.
-        </li>
-      </ol>
-    </section>
-    <section class="join-section" id="join-section">
-      <h2>Get your command</h2>
-      <p id="token-status">Loading token...</p>
-      <button type="button" id="retry-token-btn" style="display: none; margin-top: 0.5rem; padding: 0.4rem 0.8rem; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; color: var(--text); cursor: pointer; font-size: 0.85rem;">Retry token</button>
-      <div class="oneliner-wrap" id="oneliner-wrap" style="display: none;">
-        <code class="oneliner" id="oneliner"></code>
-      </div>
-      <button type="button" id="copy-btn" style="display: none; padding: 0.5rem 1rem; background: var(--accent); color: #fff; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem;">Copy command</button>
 
-      <h2 style="margin-top: 2rem;">Your details</h2>
-      <label for="backend-url">Backend URL</label>
-      <input type="text" id="backend-url" value="http://localhost:3001" placeholder="http://localhost:3001" />
-      <label for="agent-url">Your agent URL (e.g. http://localhost:8080/task)</label>
-      <input type="text" id="agent-url" value="http://localhost:8080/task" placeholder="http://localhost:8080/task" />
-      <label for="agent-name">Agent name</label>
-      <input type="text" id="agent-name" value="My Agent" placeholder="My Agent" />
+  <div class="search-wrap">
+    <textarea id="question" placeholder="e.g. What is the best way to invest £1000 as a student?"></textarea>
+    <div class="search-footer">
+      <div>
+        <button class="config-toggle" id="configToggle">⚙ API keys</button>
+        <span class="hint" style="margin-left:12px">Ctrl+Enter to run</span>
+      </div>
+      <button class="btn-run" id="runBtn">⚡ Run competition</button>
+    </div>
+  </div>
 
-      <p class="note">Run the command from the <strong>Encode-AI-Hackathon</strong> repo root (same folder as <code>packages/</code>). Your agent never leaves your machine. Token is one-time use and valid for ~90 minutes (demo-friendly).</p>
-    </section>
-    <section class="leaderboard">
+  <div class="config-bar" id="configBar">
+    <div>
+      <label>Gemini API key — used for answering + judging (free at aistudio.google.com)</label>
+      <input type="password" id="geminiKey" placeholder="AIza..." />
+    </div>
+    <div>
+      <label>HuggingFace token — Qwen 2.5 72B (free at huggingface.co/settings/tokens)</label>
+      <input type="password" id="hfKey" placeholder="hf_..." />
+    </div>
+    <div style="font-size:.75rem;font-family:var(--font-mono);color:var(--muted)">
+      Keys are saved in your browser. HuggingFace calls go through your local backend.
+    </div>
+  </div>
+
+  <div id="status"></div>
+  <div id="results"></div>
+
+  <footer>Built at Encode AI Hackathon · March 2026</footer>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+let running = false;
+
+$('configToggle').onclick = () => $('configBar').classList.toggle('open');
+$('question').addEventListener('keydown', e => { if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') run(); });
+$('runBtn').onclick = run;
+
+function setStatus(html) { $('status').innerHTML = html; }
+
+function getKeys() {
+  return {
+    gemini: $('geminiKey').value.trim() || localStorage.getItem('ao_gemini') || '',
+    hf:     $('hfKey').value.trim()     || localStorage.getItem('ao_hf')     || '',
+  };
+}
+
+function saveKeys(keys) {
+  if (keys.gemini) localStorage.setItem('ao_gemini', keys.gemini);
+  if (keys.hf)     localStorage.setItem('ao_hf', keys.hf);
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  const g = localStorage.getItem('ao_gemini');
+  const h = localStorage.getItem('ao_hf');
+  if (g) $('geminiKey').value = g;
+  if (h) $('hfKey').value = h;
+});
+
+// ── Local scoring fallback (used when Gemini judge fails) ─────────────────────
+function localScore(answers) {
+  const result = {};
+  for (const [model, text] of Object.entries(answers)) {
+    if (text.startsWith('Error:')) {
+      result[model] = { accuracy: 0, completeness: 0, clarity: 0, conciseness: 0, reasoning: 'Model failed to respond.' };
+      continue;
+    }
+    const words = text.trim().split(/\s+/).length;
+    const hasList = (text.match(/\n[-*•]|\n\d+\./g) || []).length;
+    const hasHeaders = (text.match(/#{1,3} /g) || []).length;
+    const sentences = (text.match(/[.!?]+/g) || []).length;
+    const accuracy     = Math.min(25, 12 + Math.floor(sentences * 1.2));
+    const completeness = Math.min(25, 10 + Math.floor(words / 25));
+    const clarity      = Math.min(25, 10 + hasList * 2 + hasHeaders * 3);
+    const conciseness  = words > 600 ? 10 : words > 300 ? 18 : words > 100 ? 22 : 15;
+    result[model] = { accuracy, completeness, clarity, conciseness, reasoning: 'Scored locally — Gemini judge hit rate limit.' };
+  }
+  return result;
+}
+
+// ── API calls ─────────────────────────────────────────────────────────────────
+async function callGemini(prompt, key) {
+  const t0 = Date.now();
+  const url = `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=${key}`;
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }),
+  });
+  const json = await res.json();
+  if (!res.ok) throw new Error(json?.error?.message || `Gemini ${res.status}`);
+  const text = json?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+  return { text, latency: Date.now() - t0 };
+}
+
+async function callHF(prompt) {
+  const t0 = Date.now();
+  const res = await fetch('/api/hf-query', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ prompt }),
+  });
+  const json = await res.json();
+  if (!res.ok) throw new Error(json?.error || `HF ${res.status}`);
+  return { text: json.text, latency: json.latency || (Date.now() - t0) };
+}
+
+async function judgeWithGemini(question, answers, key) {
+  const parts = Object.entries(answers)
+    .filter(([, v]) => !v.startsWith('Error:'))
+    .map(([k, v]) => `${k}: ${v}`)
+    .join('\n\n');
+
+  const judgePrompt = `You are an impartial judge evaluating AI responses.
+
+Question: "${question}"
+
+Score each answer 0-25 on four criteria (total max 100):
+1. Accuracy - factually correct?
+2. Completeness - fully addresses the question?
+3. Clarity - well-structured and easy to follow?
+4. Conciseness - appropriately brief without being superficial?
+
+Answers:
+${parts}
+
+Respond ONLY with valid JSON, no markdown:
+{"gemini":{"accuracy":0,"completeness":0,"clarity":0,"conciseness":0,"reasoning":"one sentence"},"qwen":{"accuracy":0,"completeness":0,"clarity":0,"conciseness":0,"reasoning":"one sentence"}}`;
+
+  const { text } = await callGemini(judgePrompt, key);
+  const clean = text.replace(/```json|```/g, '').trim();
+  return JSON.parse(clean);
+}
+
+// ── Main run ──────────────────────────────────────────────────────────────────
+async function run() {
+  if (running) return;
+  const question = $('question').value.trim();
+  if (question.length < 5) { setStatus('Please enter a question first.'); return; }
+
+  const keys = getKeys();
+  saveKeys(keys);
+
+  if (!keys.gemini) {
+    $('results').innerHTML = `<div class="error-box">Gemini API key is required. Click API keys above.</div>`;
+    $('configBar').classList.add('open');
+    return;
+  }
+
+  running = true;
+  $('runBtn').disabled = true;
+  $('results').innerHTML = '';
+  setStatus('<span class="spinner"></span>Sending question to all models simultaneously...');
+
+  const [geminiRes, hfRes] = await Promise.allSettled([
+    callGemini(question, keys.gemini),
+    callHF(question),
+  ]);
+
+  const answers = {
+    gemini: geminiRes.status === 'fulfilled' ? geminiRes.value.text : `Error: ${geminiRes.reason?.message}`,
+    qwen:   hfRes.status     === 'fulfilled' ? hfRes.value.text     : `Error: ${hfRes.reason?.message}`,
+  };
+  const latencies = {
+    gemini: geminiRes.status === 'fulfilled' ? geminiRes.value.latency : 0,
+    qwen:   hfRes.status     === 'fulfilled' ? hfRes.value.latency     : 0,
+  };
+
+  setStatus('<span class="spinner"></span>Judging answers...');
+
+  let scores;
+  try {
+    scores = await judgeWithGemini(question, answers, keys.gemini);
+    // Make sure both keys exist in scores
+    if (!scores.gemini) scores.gemini = localScore({ gemini: answers.gemini }).gemini;
+    if (!scores.qwen)   scores.qwen   = localScore({ qwen: answers.qwen }).qwen;
+  } catch(e) {
+    console.error('Judge failed:', e);
+    scores = localScore(answers);
+  }
+
+  setStatus('');
+  running = false;
+  $('runBtn').disabled = false;
+
+  const LABELS  = { gemini: 'Gemini 2.5 Flash', qwen: 'Qwen 2.5 (72B)' };
+  const MEDALS  = ['🥇', '🥈'];
+
+  const rows = ['gemini', 'qwen'].map(m => {
+    const s = scores[m] || { accuracy: 0, completeness: 0, clarity: 0, conciseness: 0, reasoning: 'No score' };
+    return {
+      model: m,
+      label: LABELS[m],
+      answer: answers[m],
+      latency: latencies[m],
+      scores: s,
+      total: s.accuracy + s.completeness + s.clarity + s.conciseness,
+      isError: (answers[m] || '').startsWith('Error:'),
+    };
+  }).sort((a, b) => b.total - a.total);
+
+  rows.forEach((r, i) => r.rank = i + 1);
+
+  const shortQ = question.length > 60 ? question.slice(0, 57) + '...' : question;
+
+  $('results').innerHTML = `
+    <div class="results-header">
       <h2>Leaderboard</h2>
-      <div id="cards" class="cards"></div>
-      <p id="status" class="status"></p>
-    </section>
-  </main>
-  <script type="module" src="/main.js"></script>
+      <span class="q-display">"${shortQ}"</span>
+    </div>
+
+    <div class="podium" style="grid-template-columns:repeat(${rows.length},1fr)">
+      ${rows.map((r, i) => `
+        <div class="podium-card rank-${r.rank}" style="animation-delay:${i * 80}ms">
+          <div class="medal">${MEDALS[i]}</div>
+          <div class="model-label">${r.label}</div>
+          ${r.isError
+            ? `<div class="model-error">Failed to load</div>`
+            : `<div class="total-score">${r.total}</div>
+               <div class="score-label">/ 100</div>
+               <div class="latency-badge">${r.latency ? (r.latency / 1000).toFixed(1) + 's' : '-'}</div>`
+          }
+        </div>
+      `).join('')}
+    </div>
+
+    <div class="breakdown-grid">
+      ${rows.map((r, i) => `
+        <div class="breakdown-card rank-${r.rank}" style="animation-delay:${200 + i * 100}ms">
+          <div class="breakdown-top">
+            <span class="breakdown-name">${MEDALS[i]} ${r.label}</span>
+            <span style="font-family:var(--font-mono);font-size:.8rem;color:var(--muted)">${r.latency ? (r.latency / 1000).toFixed(1) + 's' : '-'}</span>
+          </div>
+          ${r.isError
+            ? `<div class="model-error">${escHtml(r.answer)}</div>`
+            : `<div class="breakdown-reasoning">"${escHtml(r.scores.reasoning)}"</div>
+               <div class="bars">
+                 ${['accuracy', 'completeness', 'clarity', 'conciseness'].map(dim => `
+                   <div class="bar-row">
+                     <label><span>${dim}</span><span>${r.scores[dim]}/25</span></label>
+                     <div class="bar-track"><div class="bar-fill" style="width:${(r.scores[dim] / 25) * 100}%"></div></div>
+                   </div>
+                 `).join('')}
+               </div>
+               <button class="answer-toggle" onclick="toggleAnswer(this)">Show answer</button>
+               <div class="answer-text">${escHtml(r.answer)}</div>`
+          }
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function toggleAnswer(btn) {
+  const box = btn.nextElementSibling;
+  box.classList.toggle('open');
+  btn.textContent = box.classList.contains('open') ? 'Hide answer' : 'Show answer';
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+</script>
 </body>
 </html>
