@@ -13,6 +13,8 @@ const {
 const hfProxy = require('./hf-proxy');
 const geminiProxy = require('./gemini-proxy');
 const qwenProxy = require('./qwen-proxy');
+const groqProxy = require('./groq-proxy');
+const cohereProxy = require('./cohere-proxy');
 const { validateSubmitResults, normalizeAgentNameForClaim } = require('./submitValidation');
 const heatStore = require('./heatStore');
 
@@ -23,6 +25,8 @@ app.use(express.json());
 app.use('/api', hfProxy);
 app.use('/api', geminiProxy);
 app.use('/api', qwenProxy);
+app.use('/api', groqProxy);
+app.use('/api', cohereProxy);
 
 const db = initDb();
 app.set('db', db);

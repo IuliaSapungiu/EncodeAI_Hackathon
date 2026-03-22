@@ -207,6 +207,211 @@
 
     @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
     footer { margin-top: 60px; text-align: center; font-family: var(--font-mono); font-size: .72rem; color: var(--muted); }
+
+    /* ── Battle Animation ──────────────────────────────────────────── */
+    #battle-stage {
+      position:relative; background:linear-gradient(180deg,#0a0a12 0%,#0d0d1a 40%,#12121f 100%);
+      border:1px solid var(--border); border-radius:var(--radius);
+      padding:24px; margin:24px 0; overflow:hidden; min-height:460px;
+    }
+    #battle-stage::before {
+      content:''; position:absolute; inset:0; pointer-events:none;
+      background:radial-gradient(ellipse 80% 40% at 50% 55%, rgba(245,197,66,.04) 0%, transparent 70%);
+    }
+    #battle-stage .battle-particles { position:absolute; inset:0; pointer-events:none; overflow:hidden; }
+    .b-particle { position:absolute; border-radius:50%; opacity:0; animation:bPUp var(--dur,3s) ease-out forwards; }
+    @keyframes bPUp { 0%{opacity:0;transform:translateY(0) translateX(0)} 20%{opacity:.7} 100%{opacity:0;transform:translateY(-120px) translateX(var(--dx,0))} }
+
+    /* Arena flash overlay on hits */
+    .arena-flash { position:absolute; inset:0; pointer-events:none; z-index:3; opacity:0; }
+    .arena-flash.hit { animation:arenaFlash .15s ease-out; }
+    @keyframes arenaFlash { 0%{opacity:.15} 100%{opacity:0} }
+
+    /* Screen shake */
+    #battle-stage.shake { animation:bShake .3s ease-out; }
+    #battle-stage.shake-heavy { animation:bShakeHeavy .4s ease-out; }
+    @keyframes bShake { 0%{transform:translate(0)} 20%{transform:translate(-3px,2px)} 40%{transform:translate(3px,-2px)} 60%{transform:translate(-2px,1px)} 80%{transform:translate(2px,-1px)} 100%{transform:translate(0)} }
+    @keyframes bShakeHeavy { 0%{transform:translate(0)} 15%{transform:translate(-6px,4px)} 30%{transform:translate(6px,-3px)} 45%{transform:translate(-5px,2px)} 60%{transform:translate(4px,-2px)} 75%{transform:translate(-2px,1px)} 100%{transform:translate(0)} }
+
+    .battle-banner { text-align:center; margin-bottom:16px; position:relative; z-index:2; }
+    .battle-title {
+      font-size:1.4rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase;
+      background:linear-gradient(90deg,#F0C040 0%,#fff 40%,#F0C040 80%,#fff 100%);
+      background-size:200% 100%; -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+      animation:bTitleShimmer 3s linear infinite;
+    }
+    @keyframes bTitleShimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+    .battle-phase { font-family:var(--font-mono); font-size:.75rem; color:var(--gold); letter-spacing:.1em; margin-top:4px; }
+
+    /* Combo counter */
+    #battle-combo {
+      position:absolute; top:12px; right:20px; z-index:5; text-align:right; pointer-events:none;
+      opacity:0; transition:opacity .3s; font-family:var(--font-head);
+    }
+    #battle-combo.visible { opacity:1; }
+    .combo-count { font-size:1.8rem; font-weight:800; color:var(--gold); text-shadow:0 0 20px rgba(245,197,66,.5); line-height:1; }
+    .combo-label { font-family:var(--font-mono); font-size:.55rem; color:var(--gold-dim); letter-spacing:.15em; text-transform:uppercase; }
+    #battle-combo.hot .combo-count { color:#FF4545; text-shadow:0 0 25px rgba(255,69,69,.6); }
+    #battle-combo.fire .combo-count { color:#FF6B00; text-shadow:0 0 30px rgba(255,107,0,.7), 0 0 60px rgba(255,69,69,.3); animation:bComboFire .4s ease-in-out infinite alternate; }
+    @keyframes bComboFire { 0%{transform:scale(1)} 100%{transform:scale(1.08)} }
+
+    #battle-arena { position:relative; height:200px; margin:16px 0; z-index:2; }
+    #battle-arena .arena-floor {
+      position:absolute; bottom:20px; left:3%; right:3%; height:2px;
+      background:linear-gradient(90deg,transparent 0%,var(--gold-dim) 20%,var(--gold) 50%,var(--gold-dim) 80%,transparent 100%); opacity:.3;
+    }
+    /* Arena ground glow during fights */
+    #battle-arena .arena-glow {
+      position:absolute; bottom:0; left:10%; right:10%; height:40px; pointer-events:none; opacity:0;
+      background:radial-gradient(ellipse at 50% 100%, rgba(245,197,66,.12) 0%, transparent 70%);
+      transition:opacity 1s;
+    }
+    #battle-arena.fighting .arena-glow { opacity:1; animation:bGroundPulse 2s ease-in-out infinite; }
+    @keyframes bGroundPulse { 0%,100%{opacity:.6} 50%{opacity:1} }
+
+    .b-fighter-wrap {
+      position:absolute; bottom:28px; width:80px;
+      opacity:0; transform:translateY(30px) scale(.8);
+      transition:left .8s cubic-bezier(.25,.46,.45,.94), opacity .5s, transform .5s;
+    }
+    .b-fighter-wrap.visible { opacity:1; transform:translateY(0) scale(1); }
+    .b-fighter-wrap.rushing { transition:left .6s cubic-bezier(.22,1,.36,1), opacity .5s, transform .5s; }
+
+    /* Fighter aura glow */
+    .b-fighter-wrap::before {
+      content:''; position:absolute; bottom:-8px; left:50%; width:60px; height:20px;
+      transform:translateX(-50%); border-radius:50%; pointer-events:none;
+      background:radial-gradient(ellipse, var(--accent-glow,transparent) 0%, transparent 70%);
+      opacity:0; transition:opacity .5s;
+    }
+    .b-fighter-wrap.fighting::before { opacity:.8; animation:bAuraPulse 1.5s ease-in-out infinite; }
+    @keyframes bAuraPulse { 0%,100%{opacity:.5;transform:translateX(-50%) scale(1)} 50%{opacity:.9;transform:translateX(-50%) scale(1.2)} }
+
+    .b-fighter-inner { position:relative; width:80px; height:128px; }
+    .b-fighter-inner.idle { animation:bIdle 1.2s ease-in-out infinite; }
+    @keyframes bIdle { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
+    .b-fighter-inner.attack-fwd { animation:bAtkF .3s cubic-bezier(.17,.67,.29,1.5); }
+    @keyframes bAtkF { 0%{transform:translateX(0) scale(1)} 35%{transform:translateX(35px) scale(1.05)} 100%{transform:translateX(0) scale(1)} }
+    .b-fighter-inner.attack-bwd { animation:bAtkB .3s cubic-bezier(.17,.67,.29,1.5); }
+    @keyframes bAtkB { 0%{transform:translateX(0) scale(1)} 35%{transform:translateX(-35px) scale(1.05)} 100%{transform:translateX(0) scale(1)} }
+    .b-fighter-inner.hit { animation:bHit .35s; }
+    @keyframes bHit { 0%{filter:brightness(1);transform:translateX(0)} 15%{filter:brightness(3) saturate(0)} 30%{transform:translateX(8px)} 50%{filter:brightness(1.5);transform:translateX(-4px)} 100%{filter:brightness(1);transform:translateX(0)} }
+    .b-fighter-inner.crit-hit { animation:bCritHit .5s; }
+    @keyframes bCritHit { 0%{filter:brightness(1);transform:translate(0) scale(1)} 10%{filter:brightness(4) saturate(0)} 25%{transform:translate(12px,-5px) scale(.95)} 50%{filter:brightness(2);transform:translate(-6px,0) scale(1.02)} 75%{filter:brightness(1.3);transform:translate(3px,0)} 100%{filter:brightness(1);transform:translate(0) scale(1)} }
+    .b-fighter-inner.victory { animation:bVic 1s ease-out; }
+    @keyframes bVic { 0%{transform:translateY(0) scale(1)} 20%{transform:translateY(-25px) scale(1.1)} 40%{transform:translateY(-10px) scale(1)} 55%{transform:translateY(-18px) scale(1.05)} 70%{transform:translateY(-5px)} 100%{transform:translateY(0) scale(1)} }
+    .b-fighter-inner.victory-pulse { animation:bVP 1.5s ease-in-out infinite; }
+    @keyframes bVP { 0%,100%{transform:translateY(0) scale(1);filter:brightness(1) drop-shadow(0 0 0 transparent)} 50%{transform:translateY(-8px) scale(1.03);filter:brightness(1.4) drop-shadow(0 0 12px rgba(245,197,66,.4))} }
+    .b-fighter-inner.defeat { animation:bDef .8s ease-out forwards; }
+    @keyframes bDef { 0%{transform:rotate(0) translateY(0) scale(1);opacity:1;filter:brightness(1)} 40%{filter:brightness(.5)} 100%{transform:rotate(18deg) translateY(15px) scale(.9);opacity:.2;filter:brightness(.3)} }
+
+    .b-fighter-name {
+      text-align:center; font-size:.6rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+      margin-top:4px; color:var(--accent-color,var(--gold)); font-family:var(--font-mono);
+      text-shadow:0 0 10px var(--accent-glow,transparent);
+    }
+    .b-hp-track { width:70px; height:5px; background:#1a1a2e; border-radius:3px; margin:4px auto 0; overflow:hidden; position:relative; }
+    .b-hp-fill { height:100%; width:100%; border-radius:3px; transition:width .5s; background:var(--accent-color,var(--gold)); position:relative; }
+    .b-hp-fill::after { content:''; position:absolute; inset:0; background:linear-gradient(180deg,rgba(255,255,255,.25) 0%,transparent 60%); border-radius:3px; }
+    .b-hp-track.damaged { animation:bHpDamage .4s; }
+    @keyframes bHpDamage { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-2px)} 75%{transform:translateX(2px)} }
+
+    /* Floating damage numbers */
+    .b-dmg-num {
+      position:absolute; pointer-events:none; font-family:var(--font-head); font-weight:800;
+      animation:bDmgFloat .8s ease-out forwards; z-index:6;
+    }
+    @keyframes bDmgFloat { 0%{opacity:1;transform:translateY(0) scale(.5)} 20%{transform:translateY(-15px) scale(1.2)} 40%{transform:translateY(-25px) scale(1)} 100%{opacity:0;transform:translateY(-50px) scale(.8)} }
+    .b-dmg-num.crit { animation:bDmgCrit .9s ease-out forwards; }
+    @keyframes bDmgCrit { 0%{opacity:1;transform:translateY(0) scale(.5)} 15%{transform:translateY(-10px) scale(1.6)} 30%{transform:translateY(-25px) scale(1.1)} 100%{opacity:0;transform:translateY(-60px) scale(.7)} }
+
+    /* Critical hit text */
+    .b-crit-text {
+      position:absolute; pointer-events:none; z-index:7;
+      font-family:var(--font-head); font-weight:800; font-size:1rem; letter-spacing:.1em;
+      color:#FF4545; text-shadow:0 0 10px rgba(255,69,69,.6), 0 0 20px rgba(255,69,69,.3);
+      animation:bCritText .7s ease-out forwards;
+    }
+    @keyframes bCritText { 0%{opacity:1;transform:scale(0) rotate(-10deg)} 30%{transform:scale(1.3) rotate(3deg)} 50%{transform:scale(1) rotate(0)} 100%{opacity:0;transform:scale(.8) translateY(-20px)} }
+
+    /* Shockwave for critical hits */
+    .b-shockwave {
+      position:absolute; border-radius:50%; pointer-events:none;
+      border:3px solid rgba(255,69,69,.6); box-shadow:0 0 15px rgba(255,69,69,.3);
+      animation:bShockwave .6s ease-out forwards;
+    }
+    @keyframes bShockwave { 0%{transform:scale(0);opacity:1} 100%{transform:scale(6);opacity:0} }
+
+    /* Streak spark trails */
+    .b-spark-trail {
+      position:absolute; border-radius:50%; pointer-events:none;
+      animation:bSparkTrail var(--dur,.5s) ease-out forwards;
+    }
+    @keyframes bSparkTrail { 0%{opacity:1;transform:translate(0,0) scale(1)} 50%{opacity:.6} 100%{opacity:0;transform:translate(var(--sx,0),var(--sy,0)) scale(0)} }
+
+    .battle-cards { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; position:relative; z-index:2; margin-top:8px; }
+    .b-model-card {
+      background:rgba(255,255,255,.03); border:1px solid var(--border); border-radius:10px;
+      padding:12px; min-width:130px; flex:1; max-width:170px; text-align:center;
+      opacity:0; transform:translateY(20px); transition:opacity .5s, transform .5s, border-color .3s, box-shadow .3s;
+    }
+    .b-model-card.entered { opacity:1; transform:translateY(0); }
+    .b-model-card.charging {
+      border-color:var(--accent-color,var(--gold));
+      box-shadow:0 0 15px var(--accent-glow,transparent);
+      animation:bCardPulse 2s ease-in-out infinite;
+    }
+    @keyframes bCardPulse { 0%,100%{box-shadow:0 0 15px var(--accent-glow,transparent)} 50%{box-shadow:0 0 25px var(--accent-glow,transparent), 0 0 40px var(--accent-glow,transparent)} }
+    .b-model-card.done { border-color:var(--accent-color,var(--gold)); }
+    .b-model-card.winner {
+      border-color:var(--gold)!important;
+      box-shadow:0 0 25px rgba(245,197,66,.4), 0 0 50px rgba(245,197,66,.15)!important;
+      animation:bWinnerGlow 1.5s ease-in-out infinite!important;
+    }
+    @keyframes bWinnerGlow { 0%,100%{box-shadow:0 0 25px rgba(245,197,66,.4)} 50%{box-shadow:0 0 35px rgba(245,197,66,.5), 0 0 60px rgba(245,197,66,.2)} }
+    .b-model-card.loser { opacity:.35; filter:grayscale(.3); }
+    .b-card-logo { font-size:1.2rem; margin-bottom:4px; }
+    .b-card-name { font-size:.75rem; font-weight:700; color:var(--text); }
+    .b-energy-section { margin-top:8px; }
+    .b-energy-label { display:flex; justify-content:space-between; font-family:var(--font-mono); font-size:.58rem; color:var(--muted); }
+    .b-energy-track { height:5px; background:#1a1a2e; border-radius:3px; overflow:hidden; margin-top:3px; position:relative; }
+    .b-energy-fill {
+      height:100%; width:0%; border-radius:3px; transition:width .3s; background:var(--accent-color,var(--gold));
+      position:relative;
+    }
+    .b-energy-fill::after { content:''; position:absolute; inset:0; background:linear-gradient(180deg,rgba(255,255,255,.3) 0%,transparent 60%); border-radius:3px; }
+    .b-metrics { display:grid; grid-template-columns:1fr 1fr; gap:3px; margin-top:8px; }
+    .b-metric { text-align:center; }
+    .b-metric .bm-label { font-family:var(--font-mono); font-size:.48rem; color:var(--muted); text-transform:uppercase; }
+    .b-metric .bm-val { font-size:.68rem; font-weight:700; color:var(--text); }
+    .b-vs { font-weight:800; font-size:.85rem; color:var(--muted); align-self:center; opacity:0; transition:opacity .4s; }
+    .b-vs.visible { opacity:1; }
+
+    .b-clash-ring { position:absolute; border:2px solid #F0C040; border-radius:50%; pointer-events:none; animation:bRing .6s ease-out forwards; }
+    @keyframes bRing { 0%{transform:scale(0);opacity:1;border-width:3px} 50%{border-width:1px} 100%{transform:scale(5);opacity:0;border-width:0} }
+    .b-spark {
+      position:absolute; border-radius:50%; pointer-events:none;
+      box-shadow:0 0 4px var(--spark-color,#F0C040);
+      animation:bSpark var(--dur,.4s) ease-out forwards;
+    }
+    @keyframes bSpark { 0%{transform:translate(0,0) scale(1);opacity:1} 60%{opacity:.7} 100%{transform:translate(var(--sx,0),var(--sy,0)) scale(0);opacity:0} }
+    .b-burst { position:absolute; border-radius:50%; pointer-events:none; animation:bBurst var(--dur,.6s) ease-out forwards; }
+    @keyframes bBurst { 0%{transform:translate(0,0) scale(1);opacity:1} 100%{transform:translate(var(--bx,0),var(--by,0)) scale(0);opacity:0} }
+
+    #battle-bell { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%) scale(0); z-index:10; text-align:center; pointer-events:none; }
+    #battle-bell.ring { animation:bBellPop 1s cubic-bezier(.17,.67,.29,1.2) forwards; }
+    @keyframes bBellPop { 0%{transform:translate(-50%,-50%) scale(0);filter:brightness(2)} 30%{transform:translate(-50%,-50%) scale(1.3);filter:brightness(1.5)} 50%{transform:translate(-50%,-50%) scale(1)} 100%{transform:translate(-50%,-50%) scale(1);filter:brightness(1)} }
+    #battle-bell.fade { animation:bBellFade .4s forwards; }
+    @keyframes bBellFade { to{opacity:0;transform:translate(-50%,-50%) scale(.8)} }
+    .bell-text { font-size:2.2rem; font-weight:800; color:var(--gold); text-shadow:0 0 20px rgba(245,197,66,.6), 0 0 40px rgba(245,197,66,.3); letter-spacing:.12em; }
+    .bell-sub { font-family:var(--font-mono); font-size:.7rem; color:var(--gold-dim); margin-top:4px; letter-spacing:.15em; }
+
+    #battle-winner { position:absolute; top:40%; left:50%; transform:translate(-50%,-50%) scale(0); text-align:center; z-index:10; pointer-events:none; opacity:0; transition:opacity .6s, transform .6s cubic-bezier(.17,.67,.29,1.3); }
+    #battle-winner.visible { opacity:1; transform:translate(-50%,-50%) scale(1); }
+    .bw-crown { font-size:3rem; animation:bCBob 2s ease-in-out infinite; filter:drop-shadow(0 0 15px rgba(245,197,66,.5)); }
+    @keyframes bCBob { 0%,100%{transform:translateY(0) rotate(-3deg)} 50%{transform:translateY(-8px) rotate(3deg)} }
+    .bw-name { font-size:1.3rem; font-weight:800; color:var(--gold); text-shadow:0 0 15px rgba(245,197,66,.5), 0 0 30px rgba(245,197,66,.2); }
+    .bw-sub { font-family:var(--font-mono); font-size:.65rem; color:var(--gold-dim); letter-spacing:.12em; margin-top:4px; }
   </style>
 </head>
 <body>
@@ -247,6 +452,24 @@
         </div>
         <div class="model-badge">Alibaba</div>
       </label>
+      <label class="model-option" id="opt-llama">
+        <input type="checkbox" data-model="llama" />
+        <div class="model-checkbox"></div>
+        <div class="model-info">
+          <div class="model-name">Llama 3.3 (70B)</div>
+          <div class="model-desc">Meta · Fast inference via Groq</div>
+        </div>
+        <div class="model-badge">Meta</div>
+      </label>
+      <label class="model-option" id="opt-cohere">
+        <input type="checkbox" data-model="cohere" />
+        <div class="model-checkbox"></div>
+        <div class="model-info">
+          <div class="model-name">Command R</div>
+          <div class="model-desc">Cohere · Enterprise RAG-optimized</div>
+        </div>
+        <div class="model-badge">Cohere</div>
+      </label>
     </div>
     <div class="model-min-warn" id="modelWarn">⚠ Select at least 2 models to run a competition.</div>
 
@@ -283,6 +506,7 @@
     <div class="progress-label" id="progressLabel"></div>
   </div>
   <div id="status"></div>
+  <div id="battle-stage" style="display:none"></div>
   <div id="results"></div>
   <footer>Agent Olympics · Built at Encode AI Hackathon · March 2026</footer>
 </div>
@@ -298,6 +522,8 @@ const MODEL_CONFIG = {
   gemini:   { label: 'Gemini 2.5 Flash', endpoint: '/api/gemini-query' },
   deepseek: { label: 'DeepSeek R1',      endpoint: '/api/hf-query'     },
   qwen:     { label: 'Qwen 2.5 (72B)',   endpoint: '/api/qwen-query'   },
+  llama:    { label: 'Llama 3.3 (70B)',   endpoint: '/api/groq-query'   },
+  cohere:   { label: 'Command R',         endpoint: '/api/cohere-query' },
 };
 
 // ── Model selector ────────────────────────────────────────────────────────────
@@ -401,7 +627,7 @@ async function callModel(model, prompt) {
 async function judgeAnswers(question, answers, category, activeModels) {
   const validModels = activeModels.filter(m => answers[m] && !answers[m].startsWith('Error:'));
   const shuffled = [...validModels].sort(() => Math.random() - 0.5);
-  const labelNames = ['Model A', 'Model B', 'Model C'];
+  const labelNames = shuffled.map((_, i) => `Model ${String.fromCharCode(65 + i)}`);
   const mapping = {};
   const parts = shuffled.map((m, i) => { mapping[labelNames[i]] = m; return `${labelNames[i]}: ${answers[m]}`; }).join('\n\n');
 
@@ -433,6 +659,503 @@ ${JSON.stringify(expectedJson)}`;
   } catch(e) { return localScore(answers); }
 }
 
+// ── Battle Animation System ───────────────────────────────────────────────
+const BATTLE_COLORS = [
+  { armor:'#4A9EFF', mid:'#2060B0', dark:'#0d2a4a', metal:'#c0cce0', skin:'#c8855a', accent:'#4A9EFF', glow:'rgba(74,158,255,.5)', emoji:'🔵' },
+  { armor:'#FF4545', mid:'#901515', dark:'#2e0505', metal:'#d0c8c0', skin:'#c8855a', accent:'#FF4545', glow:'rgba(255,69,69,.5)', emoji:'🔴' },
+  { armor:'#FF9B3A', mid:'#904010', dark:'#301205', metal:'#c8c4b0', skin:'#c8855a', accent:'#FF9B3A', glow:'rgba(255,155,58,.5)', emoji:'🟠' },
+  { armor:'#3ddc97', mid:'#1a7a4a', dark:'#0a2a1a', metal:'#b0d0c0', skin:'#c8855a', accent:'#3ddc97', glow:'rgba(61,220,151,.5)', emoji:'🟢' },
+  { armor:'#c084fc', mid:'#7c3aed', dark:'#2e1065', metal:'#d0c8e0', skin:'#c8855a', accent:'#c084fc', glow:'rgba(192,132,252,.5)', emoji:'🟣' },
+];
+
+const battle = { active:false, fightActive:false, fightTimer:null, animFrame:null, particleInterval:null, models:[], fighterPct:[], positions:{start:[],fight:[]}, rng:null };
+
+function bRng(seed) {
+  let s = (seed ^ 0xdeadbeef) >>> 0;
+  return () => { s = Math.imul(s ^ (s >>> 14), s | 1) ^ ((s ^ Math.imul(s ^ (s >>> 14), s | 1)) >>> 7); s = (s * 0x9e3779b9) >>> 0; return (s >>> 0) / 0xffffffff; };
+}
+
+function bDrawGladiator(canvas, idx) {
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, 80, 128);
+  const rng = bRng(idx * 19861 + 42);
+  const pal = BATTLE_COLORS[idx % BATTLE_COLORS.length];
+  const helmetType = Math.floor(rng() * 3);
+  const weaponType = Math.floor(rng() * 3);
+  const shieldType = Math.floor(rng() * 3);
+  const plumes = [pal.accent, '#ffffff', '#F0C040'];
+  const plumeColor = plumes[Math.floor(rng() * 3)];
+  const fr = (x,y,w,h,r=0) => { ctx.beginPath(); ctx.roundRect(x,y,w,h,r); ctx.fill(); };
+
+  // Plume
+  ctx.fillStyle = plumeColor; ctx.strokeStyle = plumeColor;
+  if (helmetType === 0) { ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(44,24); ctx.quadraticCurveTo(56,4,44,0); ctx.quadraticCurveTo(36,4,44,24); ctx.fill(); }
+  else if (helmetType === 1) { ctx.lineWidth=2; for(let i=0;i<5;i++){ctx.beginPath();ctx.moveTo(32+i*5,18);ctx.lineTo(29+i*5,3);ctx.stroke();} }
+  else { fr(39,1,8,20,4); }
+
+  // Helmet
+  ctx.fillStyle = pal.armor;
+  if (helmetType === 0) { fr(24,18,36,22,6); ctx.fillStyle=pal.dark; fr(39,23,7,13,2); ctx.fillStyle=pal.mid; fr(24,26,9,12,[0,0,0,4]); fr(51,26,9,12,[0,0,4,0]); }
+  else if (helmetType === 1) { ctx.beginPath(); ctx.arc(42,28,20,Math.PI,0); ctx.rect(22,28,40,6); ctx.fill(); ctx.fillStyle=pal.dark; fr(28,28,6,10,[0,0,0,4]); fr(50,28,6,10,[0,0,4,0]); ctx.fillStyle=pal.skin; ctx.beginPath(); ctx.ellipse(42,32,9,10,0,0,Math.PI*2); ctx.fill(); ctx.fillStyle=pal.armor; ctx.globalAlpha=.7; fr(35,29,14,5,2); ctx.globalAlpha=1; }
+  else { ctx.beginPath(); ctx.moveTo(22,40); ctx.lineTo(30,18); ctx.lineTo(42,12); ctx.lineTo(58,20); ctx.lineTo(62,40); ctx.closePath(); ctx.fill(); ctx.fillStyle=pal.dark; fr(32,27,22,11,3); ctx.fillStyle=pal.skin; ctx.beginPath(); ctx.ellipse(43,36,8,5,0,0,Math.PI*2); ctx.fill(); }
+
+  // Pauldrons
+  ctx.fillStyle=pal.mid; fr(14,40,55,9,5); ctx.fillStyle=pal.dark; fr(14,40,16,9,[4,0,0,4]); fr(55,40,14,9,[0,4,4,0]);
+
+  // Torso
+  ctx.fillStyle=pal.armor; fr(28,48,30,26,[2,2,4,4]); ctx.fillStyle=pal.mid; for(let i=1;i<4;i++) fr(28,48+i*6,30,2);
+  ctx.fillStyle=pal.dark; ctx.beginPath(); ctx.arc(43,61,4,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle=pal.metal; ctx.beginPath(); ctx.arc(43,61,2,0,Math.PI*2); ctx.fill();
+
+  // Shield
+  ctx.fillStyle=pal.dark;
+  if (shieldType===0) { fr(2,38,22,38,3); ctx.fillStyle=pal.mid; fr(10,46,6,22,2); ctx.fillStyle=pal.metal; ctx.beginPath(); ctx.arc(13,57,4,0,Math.PI*2); ctx.fill(); }
+  else if (shieldType===1) { ctx.beginPath(); ctx.arc(12,58,18,0,Math.PI*2); ctx.fill(); ctx.strokeStyle=pal.mid; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(12,58,18,0,Math.PI*2); ctx.stroke(); ctx.fillStyle=pal.metal; ctx.beginPath(); ctx.arc(12,58,5,0,Math.PI*2); ctx.fill(); }
+  else { ctx.beginPath(); ctx.arc(16,58,11,0,Math.PI*2); ctx.fill(); ctx.strokeStyle=pal.armor; ctx.lineWidth=1.5; ctx.beginPath(); ctx.arc(16,58,11,0,Math.PI*2); ctx.stroke(); }
+
+  // Arm + Weapon
+  ctx.fillStyle=pal.mid; fr(58,44,10,16,3);
+  if (weaponType===0) { ctx.fillStyle='#5a3010'; fr(62,57,6,10,2); ctx.fillStyle=pal.metal; fr(57,66,14,4,2); ctx.save(); ctx.translate(65,70); ctx.rotate(-.25); ctx.fillStyle=pal.metal; fr(-3,0,7,22,[3,3,1,1]); ctx.fillStyle='#fff'; ctx.globalAlpha=.4; fr(-1,2,2,18,1); ctx.globalAlpha=1; ctx.restore(); }
+  else if (weaponType===1) { ctx.fillStyle='#7a5020'; fr(64,0,5,80,2); ctx.fillStyle=pal.metal; ctx.beginPath(); ctx.moveTo(61,15); ctx.lineTo(66,0); ctx.lineTo(71,15); ctx.lineTo(66,28); ctx.closePath(); ctx.fill(); }
+  else { ctx.fillStyle='#7a5020'; fr(64,20,5,65,2); ctx.fillStyle=pal.metal; [57,65,73].forEach(px=>{ctx.beginPath();ctx.moveTo(px,30);ctx.lineTo(px,8);ctx.lineTo(px+4,8);ctx.lineTo(px+4,30);ctx.closePath();ctx.fill();}); fr(54,28,22,4,2); }
+
+  // Legs + Boots
+  ctx.fillStyle=pal.dark; fr(29,74,14,20,[0,0,2,2]); fr(45,74,14,20,[0,0,2,2]);
+  ctx.fillStyle=pal.mid; fr(27,74,12,8,[2,2,0,0]); fr(47,74,12,8,[2,2,0,0]);
+  ctx.fillStyle='#2a1508'; fr(26,93,18,14,[2,2,4,4]); fr(44,93,18,14,[2,2,4,4]);
+  ctx.fillStyle='#3a2010'; fr(28,93,14,5,[2,2,0,0]); fr(46,93,14,5,[2,2,0,0]);
+}
+
+function bPositions(count) {
+  const s = [], f = [];
+  for (let i = 0; i < count; i++) {
+    s.push(count === 1 ? 42 : (i / (count - 1)) * 84);
+    f.push(count === 1 ? 42 : 12 + (i / (count - 1)) * 60);
+  }
+  return { start: s, fight: f };
+}
+
+function initBattle(models) {
+  battle.models = models;
+  battle.positions = bPositions(models.length);
+  battle.fighterPct = [...battle.positions.start];
+  battle.rng = bRng(Date.now() % 99999);
+  const stage = $('battle-stage');
+  stage.innerHTML = `
+    <div class="battle-particles" id="b-particles"></div>
+    <div class="battle-banner">
+      <div class="battle-title" id="b-title">ENTERING THE ARENA</div>
+      <div class="battle-phase" id="b-phase">SUMMONING GLADIATORS...</div>
+    </div>
+    <div id="battle-combo"><div class="combo-count" id="combo-num">0</div><div class="combo-label">HIT COMBO</div></div>
+    <div class="arena-flash" id="arena-flash"></div>
+    <div id="battle-arena"><div class="arena-floor"></div><div class="arena-glow"></div>
+      ${models.map((m, i) => {
+        const c = BATTLE_COLORS[i % BATTLE_COLORS.length];
+        return `<div class="b-fighter-wrap" id="bfw-${i}" style="--accent-color:${c.accent};--accent-glow:${c.glow}">
+          <div class="b-fighter-inner idle" id="bfi-${i}"><canvas class="b-fighter-canvas" id="bfc-${i}" width="80" height="128"></canvas></div>
+          <div class="b-fighter-name">${MODEL_CONFIG[m].label.split(' ')[0].toUpperCase()}</div>
+          <div class="b-hp-track" id="bhpt-${i}"><div class="b-hp-fill" id="bhp-${i}" style="--accent-color:${c.accent}"></div></div>
+        </div>`;
+      }).join('')}
+    </div>
+    <div class="battle-cards" id="b-cards">
+      ${models.map((m, i) => {
+        const c = BATTLE_COLORS[i % BATTLE_COLORS.length];
+        return `${i > 0 ? `<div class="b-vs" id="bvs-${i}">VS</div>` : ''}
+        <div class="b-model-card" id="bcard-${i}" style="--accent-color:${c.accent};--accent-glow:${c.glow}">
+          <div class="b-card-logo">${c.emoji}</div>
+          <div class="b-card-name">${MODEL_CONFIG[m].label}</div>
+          <div class="b-energy-section">
+            <div class="b-energy-label"><span>POWER</span><span id="bpct-${i}">0%</span></div>
+            <div class="b-energy-track"><div class="b-energy-fill" id="bfill-${i}" style="--accent-color:${c.accent}"></div></div>
+          </div>
+          <div class="b-metrics">
+            <div class="b-metric"><div class="bm-label">ACC</div><div class="bm-val" id="bm-acc-${i}">—</div></div>
+            <div class="b-metric"><div class="bm-label">COMP</div><div class="bm-val" id="bm-comp-${i}">—</div></div>
+            <div class="b-metric"><div class="bm-label">CLR</div><div class="bm-val" id="bm-clr-${i}">—</div></div>
+            <div class="b-metric"><div class="bm-label">CONC</div><div class="bm-val" id="bm-conc-${i}">—</div></div>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+    <div id="battle-bell"><div class="bell-text">⚔ FIGHT</div><div class="bell-sub">EVALUATION BEGINS</div></div>
+    <div id="battle-winner"><div class="bw-crown">🏆</div><div class="bw-name" id="bw-name"></div><div class="bw-sub">ARENA CHAMPION</div></div>`;
+  stage.style.display = 'block';
+  models.forEach((m, i) => {
+    bDrawGladiator(document.getElementById(`bfc-${i}`), i);
+    if (i > 0) document.getElementById(`bfc-${i}`).style.transform = 'scaleX(-1)';
+  });
+  const arena = document.getElementById('battle-arena');
+  const W = arena.offsetWidth;
+  models.forEach((m, i) => {
+    document.getElementById(`bfw-${i}`).style.left = (W * battle.positions.start[i] / 100) + 'px';
+  });
+}
+
+function startBattleEntry() {
+  const n = battle.models.length;
+  battle.models.forEach((m, i) => {
+    setTimeout(() => document.getElementById(`bfw-${i}`).classList.add('visible'), 200 + i * 200);
+  });
+  battle.models.forEach((m, i) => {
+    setTimeout(() => {
+      document.getElementById(`bcard-${i}`).classList.add('entered');
+      if (i > 0) document.getElementById(`bvs-${i}`).classList.add('visible');
+    }, 300 + i * 250);
+  });
+  setTimeout(() => {
+    document.getElementById('b-phase').textContent = 'ROUND 1 — EVALUATION';
+    const bell = document.getElementById('battle-bell');
+    bell.classList.add('ring');
+    setTimeout(() => {
+      bell.classList.remove('ring'); bell.classList.add('fade');
+      setTimeout(() => bell.classList.remove('fade'), 400);
+      startBattleFight();
+      startBattleCharging();
+    }, 800);
+  }, 300 + n * 250 + 200);
+  battle.particleInterval = setInterval(() => {
+    const p = document.createElement('div');
+    p.className = 'b-particle';
+    const size = Math.random() * 3 + 1;
+    const cols = ['#F0C040','#4A9EFF','#FF4545','#FF9B3A','#ffffff'];
+    const dur = Math.random() * 3 + 2;
+    const dx = (Math.random() - 0.5) * 60;
+    p.style.cssText = `width:${size}px;height:${size}px;background:${cols[Math.floor(Math.random()*cols.length)]};left:${Math.random()*100}%;bottom:${Math.random()*15}%;--dx:${dx}px;--dur:${dur}s;animation-duration:${dur}s;`;
+    const pc = document.getElementById('b-particles');
+    if (pc) pc.appendChild(p);
+    setTimeout(() => p.remove(), dur * 1000 + 500);
+  }, 350);
+}
+
+let comboCount = 0;
+let comboTimer = null;
+
+function bScreenShake(heavy) {
+  const stage = $('battle-stage');
+  const cls = heavy ? 'shake-heavy' : 'shake';
+  stage.classList.remove('shake','shake-heavy');
+  void stage.offsetWidth;
+  stage.classList.add(cls);
+  setTimeout(() => stage.classList.remove(cls), heavy ? 400 : 300);
+}
+
+function bArenaFlash(color) {
+  const flash = document.getElementById('arena-flash');
+  if (!flash) return;
+  flash.style.background = `radial-gradient(circle at 50% 60%, ${color || 'rgba(255,255,255,.3)'} 0%, transparent 70%)`;
+  flash.classList.remove('hit');
+  void flash.offsetWidth;
+  flash.classList.add('hit');
+  setTimeout(() => flash.classList.remove('hit'), 200);
+}
+
+function bDamageNumber(cx, cy, value, isCrit) {
+  const arena = document.getElementById('battle-arena');
+  const el = document.createElement('div');
+  el.className = 'b-dmg-num' + (isCrit ? ' crit' : '');
+  el.textContent = isCrit ? value + '!' : value;
+  el.style.cssText = `left:${cx + (Math.random()-0.5)*20}px;top:${cy - 10}px;font-size:${isCrit ? '1.3rem' : '.9rem'};color:${isCrit ? '#FF4545' : '#F0C040'};text-shadow:0 0 ${isCrit ? '12' : '6'}px ${isCrit ? 'rgba(255,69,69,.6)' : 'rgba(245,197,66,.5)'};`;
+  arena.appendChild(el);
+  setTimeout(() => el.remove(), isCrit ? 900 : 800);
+}
+
+function bCritText(cx, cy) {
+  const arena = document.getElementById('battle-arena');
+  const el = document.createElement('div');
+  el.className = 'b-crit-text';
+  el.textContent = 'CRITICAL!';
+  el.style.cssText = `left:${cx - 40}px;top:${cy - 30}px;`;
+  arena.appendChild(el);
+  setTimeout(() => el.remove(), 700);
+}
+
+function bShockwave(cx, cy) {
+  const arena = document.getElementById('battle-arena');
+  const el = document.createElement('div');
+  el.className = 'b-shockwave';
+  el.style.cssText = `width:20px;height:20px;left:${cx-10}px;top:${cy-10}px;`;
+  arena.appendChild(el);
+  setTimeout(() => el.remove(), 600);
+}
+
+function updateCombo() {
+  comboCount++;
+  clearTimeout(comboTimer);
+  const comboEl = document.getElementById('battle-combo');
+  const numEl = document.getElementById('combo-num');
+  if (!comboEl || !numEl) return;
+  numEl.textContent = comboCount;
+  comboEl.classList.add('visible');
+  comboEl.classList.remove('hot','fire');
+  if (comboCount >= 15) comboEl.classList.add('fire');
+  else if (comboCount >= 8) comboEl.classList.add('hot');
+  // Pulse the number
+  numEl.style.transform = 'scale(1.3)';
+  setTimeout(() => numEl.style.transform = 'scale(1)', 150);
+  comboTimer = setTimeout(() => {
+    comboCount = 0;
+    comboEl.classList.remove('visible','hot','fire');
+  }, 2500);
+}
+
+function startBattleFight() {
+  battle.fightActive = true;
+  comboCount = 0;
+  const arena = document.getElementById('battle-arena');
+  arena.classList.add('fighting');
+  const W = arena.offsetWidth;
+  battle.models.forEach((m, i) => {
+    const el = document.getElementById(`bfw-${i}`);
+    el.classList.add('rushing','fighting');
+    battle.fighterPct[i] = battle.positions.fight[i];
+    el.style.left = (W * battle.positions.fight[i] / 100) + 'px';
+  });
+  setTimeout(() => bFightLoop(), 700);
+}
+
+function bFightLoop() {
+  if (!battle.fightActive) return;
+  const n = battle.models.length;
+  const attIdx = Math.floor(battle.rng() * n);
+  let targIdx = Math.floor(battle.rng() * (n - 1));
+  if (targIdx >= attIdx) targIdx++;
+  document.getElementById(`bfc-${attIdx}`).style.transform = attIdx < targIdx ? '' : 'scaleX(-1)';
+  document.getElementById(`bfc-${targIdx}`).style.transform = targIdx < attIdx ? '' : 'scaleX(-1)';
+  const isCrit = battle.rng() < 0.15; // 15% critical hit chance
+  bTriggerAttack(attIdx, targIdx, isCrit);
+  // Faster pacing for more action
+  battle.fightTimer = setTimeout(bFightLoop, 450 + battle.rng() * 600);
+}
+
+function bTriggerAttack(attIdx, targIdx, isCrit) {
+  const fiAtt = document.getElementById(`bfi-${attIdx}`);
+  const fiTarg = document.getElementById(`bfi-${targIdx}`);
+  const atkClass = attIdx < targIdx ? 'attack-fwd' : 'attack-bwd';
+  fiAtt.classList.remove('idle','attack-fwd','attack-bwd');
+  void fiAtt.offsetWidth;
+  fiAtt.classList.add(atkClass);
+  setTimeout(() => {
+    const hitClass = isCrit ? 'crit-hit' : 'hit';
+    fiTarg.classList.remove('idle','hit','crit-hit');
+    void fiTarg.offsetWidth;
+    fiTarg.classList.add(hitClass);
+    bSpawnClash(attIdx, targIdx, isCrit);
+    bScreenShake(isCrit);
+    bArenaFlash(isCrit ? 'rgba(255,69,69,.25)' : undefined);
+    updateCombo();
+    // HP bar damage flash
+    const hpTrack = document.getElementById(`bhpt-${targIdx}`);
+    if (hpTrack) { hpTrack.classList.remove('damaged'); void hpTrack.offsetWidth; hpTrack.classList.add('damaged'); setTimeout(() => hpTrack.classList.remove('damaged'), 400); }
+    setTimeout(() => {
+      fiAtt.classList.remove(atkClass); fiTarg.classList.remove(hitClass);
+      fiAtt.classList.add('idle'); fiTarg.classList.add('idle');
+    }, isCrit ? 500 : 350);
+  }, 150);
+}
+
+function bSpawnClash(attIdx, targIdx, isCrit) {
+  const arena = document.getElementById('battle-arena');
+  const W = arena.offsetWidth;
+  const ax = W * battle.fighterPct[attIdx] / 100 + 60;
+  const bx = W * battle.fighterPct[targIdx] / 100 + 20;
+  const cx = (ax + bx) / 2, cy = 70;
+
+  // Damage number
+  const dmg = isCrit ? Math.floor(30 + Math.random() * 20) : Math.floor(8 + Math.random() * 15);
+  bDamageNumber(cx, cy, dmg, isCrit);
+
+  // Critical hit extras
+  if (isCrit) {
+    bCritText(cx, cy);
+    bShockwave(cx, cy);
+  }
+
+  // Clash ring(s)
+  const ring = document.createElement('div');
+  ring.className = 'b-clash-ring';
+  ring.style.cssText = `width:${isCrit ? 30 : 20}px;height:${isCrit ? 30 : 20}px;left:${cx-(isCrit?15:10)}px;top:${cy-(isCrit?15:10)}px;border-color:${isCrit ? '#FF4545' : '#F0C040'};`;
+  arena.appendChild(ring);
+  setTimeout(() => ring.remove(), 600);
+  if (isCrit) {
+    setTimeout(() => {
+      const ring2 = document.createElement('div');
+      ring2.className = 'b-clash-ring';
+      ring2.style.cssText = `width:20px;height:20px;left:${cx-10}px;top:${cy-10}px;border-color:#FF8800;`;
+      arena.appendChild(ring2);
+      setTimeout(() => ring2.remove(), 600);
+    }, 80);
+  }
+
+  // Sparks — more sparks with glow
+  const sparkColors = ['#F0C040','#ffffff','#FF8800','#FFDD44','#FF4545'];
+  const sparkCount = isCrit ? 22 : 14;
+  for (let i = 0; i < sparkCount; i++) {
+    const sp = document.createElement('div');
+    sp.className = 'b-spark';
+    const angle = Math.random() * Math.PI * 2;
+    const dist = (isCrit ? 25 : 18) + Math.random() * (isCrit ? 65 : 45);
+    const size = Math.random() * (isCrit ? 6 : 4) + 2;
+    const dur = (0.2 + Math.random() * (isCrit ? 0.5 : 0.35)).toFixed(2);
+    const color = sparkColors[Math.floor(Math.random()*sparkColors.length)];
+    sp.style.cssText = `width:${size}px;height:${size}px;background:${color};--spark-color:${color};left:${cx}px;top:${cy}px;--sx:${Math.cos(angle)*dist}px;--sy:${Math.sin(angle)*dist}px;--dur:${dur}s;`;
+    arena.appendChild(sp);
+    setTimeout(() => sp.remove(), parseFloat(dur) * 1000 + 100);
+  }
+
+  // Spark trails on crits
+  if (isCrit) {
+    for (let i = 0; i < 6; i++) {
+      const trail = document.createElement('div');
+      trail.className = 'b-spark-trail';
+      const angle = Math.random() * Math.PI * 2;
+      const dist = 30 + Math.random() * 50;
+      const dur = (0.4 + Math.random() * 0.3).toFixed(2);
+      trail.style.cssText = `width:3px;height:12px;background:linear-gradient(${Math.floor(angle*180/Math.PI)}deg,#FF4545,transparent);left:${cx}px;top:${cy}px;--sx:${Math.cos(angle)*dist}px;--sy:${Math.sin(angle)*dist}px;--dur:${dur}s;`;
+      arena.appendChild(trail);
+      setTimeout(() => trail.remove(), 500);
+    }
+  }
+}
+
+function startBattleCharging() {
+  document.getElementById('b-phase').textContent = 'GENERATING RESPONSES...';
+  document.getElementById('b-title').textContent = 'EVALUATING';
+  const n = battle.models.length;
+  for (let i = 0; i < n; i++) document.getElementById(`bcard-${i}`).classList.add('charging');
+  const chargingStart = performance.now();
+  const bars = battle.models.map(() => ({ current: 0 }));
+  function loop(now) {
+    if (!battle.active) return;
+    const elapsed = now - chargingStart;
+    for (let i = 0; i < n; i++) {
+      const target = Math.min(95, elapsed / 200);
+      const noise = Math.sin(now * 0.003 + i * 2.1) * 3;
+      const val = Math.min(95, Math.max(0, target + noise));
+      bars[i].current += (val - bars[i].current) * 0.04;
+      const pct = Math.floor(bars[i].current);
+      const f = document.getElementById(`bfill-${i}`);
+      const p = document.getElementById(`bpct-${i}`);
+      if (f) f.style.width = bars[i].current + '%';
+      if (p) p.textContent = pct + '%';
+    }
+    battle.animFrame = requestAnimationFrame(loop);
+  }
+  battle.animFrame = requestAnimationFrame(loop);
+}
+
+function bBurst(el, count, color) {
+  if (!el) return;
+  const rect = el.getBoundingClientRect();
+  const cx = rect.left + rect.width / 2, cy = rect.top + rect.height / 2;
+  for (let i = 0; i < count; i++) {
+    const b = document.createElement('div');
+    b.className = 'b-burst';
+    const angle = (i / count) * Math.PI * 2;
+    const dist = 40 + Math.random() * 80;
+    const size = Math.random() * 5 + 2;
+    const dur = (0.4 + Math.random() * 0.4).toFixed(2);
+    b.style.cssText = `width:${size}px;height:${size}px;background:${color};left:${cx}px;top:${cy}px;position:fixed;--bx:${Math.cos(angle)*dist}px;--by:${Math.sin(angle)*dist}px;--dur:${dur}s;z-index:9999;`;
+    document.body.appendChild(b);
+    setTimeout(() => b.remove(), 1000);
+  }
+}
+
+function bAnimNum(el, target, duration) {
+  if (!el) return;
+  const start = performance.now();
+  const tick = (now) => {
+    const t = Math.min(1, (now - start) / duration);
+    el.textContent = Math.floor((1 - Math.pow(1 - t, 3)) * target);
+    if (t < 1) requestAnimationFrame(tick); else el.textContent = target;
+  };
+  requestAnimationFrame(tick);
+}
+
+function startBattle(activeModels) {
+  cleanupBattle();
+  battle.active = true;
+  initBattle(activeModels);
+  startBattleEntry();
+}
+
+function endBattle(winnerModel, avgScores) {
+  cancelAnimationFrame(battle.animFrame);
+  const n = battle.models.length;
+  const winIdx = battle.models.indexOf(winnerModel);
+
+  for (let i = 0; i < n; i++) {
+    const f = document.getElementById(`bfill-${i}`);
+    const p = document.getElementById(`bpct-${i}`);
+    if (f) f.style.width = '100%';
+    if (p) p.textContent = '100%';
+    const card = document.getElementById(`bcard-${i}`);
+    if (card) { card.classList.remove('charging'); card.classList.add('done'); }
+    bBurst(card, 15, BATTLE_COLORS[i % BATTLE_COLORS.length].accent);
+  }
+
+  if (avgScores) {
+    battle.models.forEach((m, i) => {
+      const s = avgScores[m];
+      if (s) {
+        setTimeout(() => {
+          bAnimNum(document.getElementById(`bm-acc-${i}`), s.accuracy || 0, 500);
+          bAnimNum(document.getElementById(`bm-comp-${i}`), s.completeness || 0, 500);
+          bAnimNum(document.getElementById(`bm-clr-${i}`), s.clarity || 0, 500);
+          bAnimNum(document.getElementById(`bm-conc-${i}`), s.conciseness || 0, 500);
+        }, i * 150);
+      }
+    });
+    const maxTotal = Math.max(...battle.models.map(m => { const s = avgScores[m]; return s ? (s.accuracy+s.completeness+s.clarity+s.conciseness) : 0; }));
+    battle.models.forEach((m, i) => {
+      const s = avgScores[m];
+      const total = s ? (s.accuracy+s.completeness+s.clarity+s.conciseness) : 0;
+      const hp = document.getElementById(`bhp-${i}`);
+      if (hp) hp.style.width = (maxTotal > 0 ? (total / maxTotal) * 100 : 0) + '%';
+    });
+  }
+
+  document.getElementById('b-phase').textContent = 'RESULTS';
+  document.getElementById('b-title').textContent = 'FINAL SCORES';
+
+  setTimeout(() => {
+    battle.fightActive = false;
+    clearTimeout(battle.fightTimer);
+    for (let i = 0; i < n; i++) {
+      const fi = document.getElementById(`bfi-${i}`);
+      if (!fi) continue;
+      fi.classList.remove('idle','attack-fwd','attack-bwd','hit');
+      if (i === winIdx) {
+        fi.classList.add('victory');
+        setTimeout(() => { fi.classList.remove('victory'); fi.classList.add('victory-pulse'); }, 800);
+        document.getElementById(`bcard-${i}`)?.classList.add('winner');
+        bBurst(document.getElementById(`bcard-${i}`), 30, '#F0C040');
+      } else {
+        fi.classList.add('defeat');
+        const card = document.getElementById(`bcard-${i}`);
+        if (card) { card.classList.add('loser'); card.classList.remove('done'); }
+      }
+    }
+    if (winIdx >= 0) {
+      document.getElementById('bw-name').textContent = MODEL_CONFIG[winnerModel].label;
+      document.getElementById('battle-winner').classList.add('visible');
+      document.getElementById('b-phase').textContent = '🏆 CHAMPION CROWNED';
+    }
+  }, 800);
+}
+
+function cleanupBattle() {
+  battle.active = false;
+  battle.fightActive = false;
+  clearTimeout(battle.fightTimer);
+  cancelAnimationFrame(battle.animFrame);
+  clearInterval(battle.particleInterval);
+  const stage = $('battle-stage');
+  stage.innerHTML = '';
+  stage.style.display = 'none';
+}
+
 // ── Run one question ──────────────────────────────────────────────────────────
 async function runOne(question, category, idx, total, activeModels) {
   setProgress(Math.round((idx / total) * 80), `Running question ${idx + 1} of ${total}...`);
@@ -450,7 +1173,7 @@ async function runOne(question, category, idx, total, activeModels) {
   setStatus(`<span class="spinner"></span>Q${idx+1}: Judging answers...`);
   const scores = await judgeAnswers(question, answers, category, activeModels);
 
-  const MEDALS = ['🥇','🥈','🥉'];
+  const MEDALS = ['🥇','🥈','🥉','4th','5th'];
   const rows = activeModels.map(m => {
     const s = scores[m] || { accuracy:0, completeness:0, clarity:0, conciseness:0, reasoning:'No score' };
     return { model: m, label: MODEL_CONFIG[m].label, answer: answers[m], latency: latencies[m],
@@ -480,12 +1203,29 @@ async function run() {
 
   running = true; $('runBtn').disabled = true; $('results').innerHTML = ''; allResults = [];
   $('progress').style.display = 'block';
+  startBattle(activeModels);
 
   for (let i = 0; i < questions.length; i++) {
     const result = await runOne(questions[i], selectedCategory, i, questions.length, activeModels);
     allResults.push(result);
     renderResults(allResults, questions.length);
   }
+
+  // Compute average scores for battle end
+  const avgScores = {};
+  activeModels.forEach(m => {
+    let tA=0,tCo=0,tCl=0,tCn=0,cnt=0;
+    allResults.forEach(r => {
+      const row = r.rows.find(rw => rw.model === m);
+      if (row && !row.isError) { tA+=row.scores.accuracy; tCo+=row.scores.completeness; tCl+=row.scores.clarity; tCn+=row.scores.conciseness; cnt++; }
+    });
+    if (cnt > 0) avgScores[m] = { accuracy:Math.round(tA/cnt), completeness:Math.round(tCo/cnt), clarity:Math.round(tCl/cnt), conciseness:Math.round(tCn/cnt) };
+  });
+  const wins = {};
+  activeModels.forEach(m => wins[m] = 0);
+  allResults.forEach(r => { if (!r.rows[0].isError) wins[r.rows[0].model] = (wins[r.rows[0].model]||0)+1; });
+  const overallWinner = Object.entries(wins).sort((a,b) => b[1]-a[1])[0][0];
+  endBattle(overallWinner, avgScores);
 
   setProgress(100, `Evaluation complete — ${questions.length} question${questions.length>1?'s':''} analysed`);
   setStatus(''); running = false; $('runBtn').disabled = false;
@@ -573,7 +1313,7 @@ function toggleAnswer(btn) {
 }
 
 function exportCSV() {
-  const activeModels = allResults[0]?.activeModels || ['gemini','deepseek','qwen'];
+  const activeModels = allResults[0]?.activeModels || Object.keys(MODEL_CONFIG);
   const headers = ['Question','Category','Winner',
     ...activeModels.flatMap(m => [`${MODEL_CONFIG[m].label} Score`, `${MODEL_CONFIG[m].label} Accuracy`, `${MODEL_CONFIG[m].label} Completeness`, `${MODEL_CONFIG[m].label} Clarity`, `${MODEL_CONFIG[m].label} Conciseness`, `${MODEL_CONFIG[m].label} Latency(s)`, `${MODEL_CONFIG[m].label} Reasoning`])
   ];
