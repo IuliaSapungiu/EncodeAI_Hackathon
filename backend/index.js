@@ -1,4 +1,4 @@
-require('dotenv').config();
+if (process.env.NODE_ENV !== 'production') require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const crypto = require('crypto');
@@ -22,6 +22,16 @@ const heatStore = require('./heatStore');
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+app.get('/debug-env', (req, res) => {
+  res.json({ 
+    groq: process.env.GROQ_API_KEY ? 'SET' : 'NOT SET',
+    cohere: process.env.COHERE_API_KEY ? 'SET' : 'NOT SET',
+    gemini: process.env.GEMINI_API_KEY ? 'SET' : 'NOT SET',
+    hf: process.env.HF_API_KEY ? 'SET' : 'NOT SET',
+  });
+});
+
 app.use('/api', hfProxy);
 app.use('/api', geminiProxy);
 app.use('/api', qwenProxy);
