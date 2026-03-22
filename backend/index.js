@@ -18,10 +18,7 @@ const heatStore = require('./heatStore');
 
 
 const app = express();
-app.use(cors({
-  origin: ['https://buildify-arena.vercel.app', 'https://encode-ai-hackathon.vercel.app', 'http://localhost:5173'],
-  methods: ['GET', 'POST'],
-}));
+app.use(cors());
 app.use(express.json());
 app.use('/api', hfProxy);
 app.use('/api', geminiProxy);
